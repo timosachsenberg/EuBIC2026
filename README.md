@@ -111,10 +111,10 @@ This installs:
 On Linux x86_64 you can install the same wheel from this repository:
 
 ```bash
-pip install wheels/pyopenms-*-cp312-cp312-manylinux_2_34_x86_64.whl
+pip install wheels/pyopenms-*-cp313-cp313-manylinux_2_34_x86_64.whl
 ```
 
-(Wheels for CPython 3.11 and 3.13 are vendored as well - swap the `cp312` tag.)
+(Wheels for CPython 3.11 and 3.12 are vendored as well - swap the `cp313` tag.)
 
 #### Step 4: Start Jupyter
 
@@ -302,7 +302,7 @@ WHEEL_SHA256 = {"cp311": "25c9f994...", "cp312": "b1d8f495...", "cp313": "5772a0
 
 The tag name is derived from the version and the pin revision, so the script has only these
 few values to keep in sync. Wheels are built for Linux x86_64 / `manylinux_2_34`, for
-CPython 3.11, 3.12 (Google Colab's current runtime) and 3.13, so the pin survives Colab
+CPython 3.11, 3.12 and 3.13 (Google Colab's current runtime), so the pin survives Colab
 moving its runtime in either direction.
 
 **Why a pin revision?** Published tags are never moved, so anything that changes the wheel

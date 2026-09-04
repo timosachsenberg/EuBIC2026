@@ -11,7 +11,7 @@ every participant runs byte-identical software.
 | Git tag | `wheels-3.6.0.dev20260903-r2` |
 | Upstream | `https://pypi.openms.de/simple/pyopenms/` |
 | Platform | `manylinux_2_34_x86_64` (Linux, glibc ≥ 2.34) |
-| Python | CPython 3.11, 3.12 (Google Colab's runtime) and 3.13 |
+| Python | CPython 3.11, 3.12 and 3.13 (Google Colab's runtime) |
 
 Checksums are in [`SHA256SUMS`](SHA256SUMS); they match the hashes published by the
 pypi.openms.de simple index and the `WHEEL_SHA256` values in the notebooks.
@@ -44,5 +44,5 @@ revision instead.
 ## Installing manually
 
 ```bash
-pip install wheels/pyopenms-3.6.0.dev20260903-cp312-cp312-manylinux_2_34_x86_64.whl
+pip install wheels/pyopenms-3.6.0.dev20260903-cp313-cp313-manylinux_2_34_x86_64.whl
 ```
