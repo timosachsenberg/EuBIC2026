@@ -52,12 +52,12 @@ For a better experience or offline work, install the notebooks locally.
 
 **Option A: Using Git (recommended)**
 ```bash
-git clone https://github.com/timosachsenberg/EuBIC2026.git
-cd EuBIC2026
+git clone https://github.com/timosachsenberg/PyOpenMSCourse.git
+cd PyOpenMSCourse
 ```
 
 **Option B: Download ZIP**
-1. Go to https://github.com/timosachsenberg/EuBIC2026
+1. Go to https://github.com/timosachsenberg/PyOpenMSCourse
 2. Click the green "Code" button
 3. Select "Download ZIP"
 4. Extract the ZIP file and navigate to the folder
@@ -247,7 +247,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ## Repository Structure
 
 ```
-EuBIC2026/
+PyOpenMSCourse/
 ├── notebooks/
 │   ├── EUBIC_Task0_Prerequisites.ipynb  # Python & MS fundamentals
 │   ├── EUBIC_Task1_Peaks.ipynb          # Digestion & MS1 data
