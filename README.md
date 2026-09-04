@@ -6,12 +6,14 @@ Educational Jupyter notebooks for the EuBIC 2026 Winter School, teaching proteom
 
 ## Notebooks
 
-| Notebook | Topic | Description |
-|----------|-------|-------------|
-| **Task 0** | Prerequisites | Python, NumPy, pandas, and mass spectrometry fundamentals (optional) |
-| **Task 1** | Peaks | Protein digestion, MS1 visualization, isotope patterns, TIC |
-| **Task 2** | Identification | Peptide database search, fragment spectra, scoring, mirror plots |
-| **Task 3** | Quantification | Feature detection with Biosaur2, ID mapping, visualization |
+Click a badge to run a notebook in Google Colab - nothing to install.
+
+| Notebook | Topic | Description | Run it |
+|----------|-------|-------------|--------|
+| **Task 0** | Prerequisites | Python, NumPy, pandas, and mass spectrometry fundamentals (optional) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/timosachsenberg/PyOpenMSCourse/blob/main/notebooks/EUBIC_Task0_Prerequisites.ipynb) |
+| **Task 1** | Peaks | Protein digestion, MS1 visualization, isotope patterns, TIC | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/timosachsenberg/PyOpenMSCourse/blob/main/notebooks/EUBIC_Task1_Peaks.ipynb) |
+| **Task 2** | Identification | Peptide database search, fragment spectra, scoring, mirror plots | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/timosachsenberg/PyOpenMSCourse/blob/main/notebooks/EUBIC_Task2_ID.ipynb) |
+| **Task 3** | Quantification | Feature detection with Biosaur2, ID mapping, visualization | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/timosachsenberg/PyOpenMSCourse/blob/main/notebooks/EUBIC_Task3_Quant.ipynb) |
 
 **New to Python or mass spectrometry?** Start with Task 0 to learn the fundamentals.
 
@@ -23,7 +25,8 @@ Educational Jupyter notebooks for the EuBIC 2026 Winter School, teaching proteom
 
 The easiest way to run the notebooks is using Google Colab - no local installation needed!
 
-1. Click the **"Open in Colab"** badge at the top of any notebook
+1. Click an **"Open in Colab"** badge in the [table above](#notebooks) - the same badge
+   also sits at the top of every notebook
 2. The notebook will open in your browser
 3. Run the first cell to install dependencies (takes ~1-2 minutes)
 4. You're ready to go!
