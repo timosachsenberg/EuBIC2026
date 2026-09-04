@@ -208,3 +208,8 @@ __marimo__/
 
 # Large data files (exceed GitHub 100MB limit)
 data/UPS1_50000amol_R2.mzML
+
+# Vendored pyOpenMS nightly wheels for the course (override the "wheels/" rule
+# from the standard Python .gitignore template above) - see wheels/README.md
+!wheels/
+!wheels/*

@@ -30,6 +30,12 @@ The easiest way to run the notebooks is using Google Colab - no local installati
 
 **Requirements:** Only a Google account and internet connection.
 
+The install cell pulls a **pinned pyOpenMS nightly wheel that is committed to this
+repository** under [`wheels/`](wheels/), so the notebooks keep working even if the
+nightly build server `pypi.openms.de` is down. If the pinned wheel does not fit the
+runtime, the cell falls back to `pypi.openms.de` and then to the stable PyPI release.
+See [`wheels/README.md`](wheels/README.md) for the pinned version and how to refresh it.
+
 ---
 
 ### Option 2: Run Locally on Your Computer
@@ -96,6 +102,13 @@ This installs:
 - `pyopenms-viz` (>=1.0.0) - MS-specific visualizations
 
 **Note:** The `pyopenms` installation may take a few minutes as it includes C++ bindings.
+
+**Want the exact build used in the course?** The notebooks pin a pyOpenMS nightly.
+On Linux x86_64 you can install the same wheel from this repository:
+
+```bash
+pip install wheels/pyopenms-*-cp312-cp312-manylinux_2_34_x86_64.whl
+```
 
 #### Step 4: Start Jupyter
 
@@ -241,6 +254,9 @@ EuBIC2026/
 │   ├── EUBIC_Task2_ID.ipynb             # Peptide identification
 │   └── EUBIC_Task3_Quant.ipynb          # Quantification
 ├── data/                                 # Sample data files
+├── wheels/                               # Pinned pyOpenMS nightly wheels (Colab fallback)
+├── scripts/
+│   └── update_pyopenms_wheels.sh         # Refresh the pinned nightly
 ├── requirements.txt                      # Python dependencies
 ├── CLAUDE.md                            # AI assistant instructions
 └── README.md                            # This file

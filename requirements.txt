@@ -15,5 +15,8 @@ plotly>=5.14.0
 ipywidgets>=8.0.0
 
 # Mass spectrometry
+# NOTE: the notebooks pin a pyOpenMS *nightly* build that is vendored in wheels/.
+# To match the course environment exactly on Linux x86_64, install it instead:
+#   pip install wheels/pyopenms-*-cp312-cp312-manylinux_2_34_x86_64.whl
 pyopenms>=3.5.0
 pyopenms-viz>=1.0.0

@@ -1,0 +1,2 @@
+# Vendored pyOpenMS wheels are binary - never apply EOL conversion
+*.whl binary
