@@ -1,3 +1,5 @@
+# Update: Now tracks current pyopenms nightly
+
 # EuBIC2026 Winter School
 
 Educational Jupyter notebooks for the EuBIC 2026 Winter School, teaching proteomics data analysis workflows using PyOpenMS.
