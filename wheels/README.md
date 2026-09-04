@@ -8,10 +8,10 @@ every participant runs byte-identical software.
 | | |
 |---|---|
 | Pinned version | `3.6.0.dev20260903` |
-| Git tag | `wheels-3.6.0.dev20260903` |
+| Git tag | `wheels-3.6.0.dev20260903-r2` |
 | Upstream | `https://pypi.openms.de/simple/pyopenms/` |
 | Platform | `manylinux_2_34_x86_64` (Linux, glibc ≥ 2.34) |
-| Python | CPython 3.12 (Google Colab's runtime) and 3.13 (spare) |
+| Python | CPython 3.11, 3.12 (Google Colab's runtime) and 3.13 |
 
 Checksums are in [`SHA256SUMS`](SHA256SUMS); they match the hashes published by the
 pypi.openms.de simple index and the `WHEEL_SHA256` values in the notebooks.
@@ -20,7 +20,7 @@ pypi.openms.de simple index and the `WHEEL_SHA256` values in the notebooks.
 
 The install cell resolves the wheel for the running interpreter and tries, in order:
 
-1. `https://raw.githubusercontent.com/<repo>/wheels-<version>/wheels/<wheel>#sha256=...`
+1. `https://raw.githubusercontent.com/<repo>/wheels-<version>-r<revision>/wheels/<wheel>#sha256=...`
 2. the nightly index `https://pypi.openms.de/simple/`
 3. the stable `pyopenms` release from PyPI
 
@@ -38,7 +38,8 @@ python ../scripts/update_pyopenms_wheels.py --verify  # check the published pin
 
 The full procedure, including publishing the git tag the notebooks point at, is in
 [Updating the pinned pyOpenMS nightly](../README.md#updating-the-pinned-pyopenms-nightly).
-Never move or delete a published `wheels-*` tag.
+Never move or delete a published `wheels-*` tag; a changed wheel set gets a new pin
+revision instead.
 
 ## Installing manually
 

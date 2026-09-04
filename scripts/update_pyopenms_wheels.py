@@ -28,7 +28,7 @@ from pathlib import Path
 INDEX_URL = "https://pypi.openms.de/simple/pyopenms/"
 PACKAGES_URL = "https://pypi.openms.de/packages"
 PLATFORM = "manylinux_2_34_x86_64"
-PY_TAGS = ("cp312", "cp313")  # cp312 = Google Colab's runtime, cp313 = spare
+PY_TAGS = ("cp311", "cp312", "cp313")  # cp312 = Google Colab's runtime, the others are spares
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WHEEL_DIR = REPO_ROOT / "wheels"
@@ -39,6 +39,7 @@ SHA_BLOCK_RE = re.compile(r"^WHEEL_SHA256 = \{\n(?:.*\n)*?\}$", re.MULTILINE)
 SHA_ENTRY_RE = re.compile(r'^\s*"(?P<tag>cp\d+)": "(?P<sha>[0-9a-f]{64})",$', re.MULTILINE)
 REPO_RE = re.compile(r'^WHEEL_REPO = "(?P<repo>[^"]+)"$', re.MULTILINE)
 REF_RE = re.compile(r'^WHEEL_REF = f"(?P<ref>[^"]*)"', re.MULTILINE)
+REVISION_RE = re.compile(r"^WHEEL_PIN_REVISION = (?P<revision>\d+)", re.MULTILINE)
 
 
 def fetch(url: str) -> bytes:
@@ -74,12 +75,17 @@ def pinned_config() -> dict:
         version = VERSION_RE.search(source)
         repo = REPO_RE.search(source)
         ref = REF_RE.search(source)
-        if not (version and repo and ref):
+        revision = REVISION_RE.search(source)
+        if not (version and repo and ref and revision):
             raise SystemExit(f"{path}: install cell does not match the expected layout")
+        resolved = (ref["ref"]
+                    .replace("{PYOPENMS_VERSION}", version["version"])
+                    .replace("{WHEEL_PIN_REVISION}", revision["revision"]))
         configs[path.name] = {
             "version": version["version"],
+            "revision": int(revision["revision"]),
             "repo": repo["repo"],
-            "ref": ref["ref"].replace("{PYOPENMS_VERSION}", version["version"]),
+            "ref": resolved,
             "sha256": {m["tag"]: m["sha"] for m in SHA_ENTRY_RE.finditer(source)},
         }
     distinct = {json.dumps(c, sort_keys=True) for c in configs.values()}
@@ -94,7 +100,7 @@ def verify() -> int:
     """Check that the pinned URLs really serve the pinned bytes."""
     config = pinned_config()
     base = f"https://raw.githubusercontent.com/{config['repo']}/{config['ref']}/wheels"
-    print(f"pinned version : {config['version']}")
+    print(f"pinned version : {config['version']} (pin revision {config['revision']})")
     print(f"pinned ref     : {config['ref']}")
     failures = 0
 
@@ -124,7 +130,7 @@ def verify() -> int:
     return 1 if failures else 0
 
 
-def rewrite_notebooks(version: str, hashes: dict[str, str]) -> None:
+def rewrite_notebooks(version: str, revision: int, hashes: dict[str, str]) -> None:
     block = "WHEEL_SHA256 = {\n"
     block += "".join(f'    "{tag}": "{hashes[tag]}",\n' for tag in sorted(hashes))
     block += "}"
@@ -136,6 +142,7 @@ def rewrite_notebooks(version: str, hashes: dict[str, str]) -> None:
             if cell["cell_type"] != "code" or "PYOPENMS_VERSION" not in source:
                 continue
             updated = VERSION_RE.sub(f'PYOPENMS_VERSION = "{version}"', source)
+            updated = REVISION_RE.sub(f"WHEEL_PIN_REVISION = {revision}", updated)
             updated, count = SHA_BLOCK_RE.subn(block.replace("\\", "\\\\"), updated)
             if count != 1:
                 raise SystemExit(f"{path}: could not locate the WHEEL_SHA256 block")
@@ -145,11 +152,11 @@ def rewrite_notebooks(version: str, hashes: dict[str, str]) -> None:
             cell["source"] = [line + "\n" for line in updated.split("\n")[:-1]]
             path.write_text(json.dumps(notebook, indent=1, ensure_ascii=False) + "\n",
                             encoding="utf-8", newline="")
-            print(f"  {path.name}: pinned to {version}")
+            print(f"  {path.name}: pinned to {version} r{revision}")
             break
 
 
-def update(version: str | None) -> int:
+def update(version: str | None, revision: int | None) -> int:
     index = read_index()
     if version is None:
         versions = {re.search(r"pyopenms-([^-]+)-", name)[1] for name in index}
@@ -189,9 +196,21 @@ def update(version: str | None) -> int:
         f"{hashes[tag]}  {wheel_name(version, tag)}\n" for tag in sorted(hashes)
     )
     (WHEEL_DIR / "SHA256SUMS").write_text(checksums, encoding="utf-8", newline="")
-    rewrite_notebooks(version, hashes)
+    if revision is None:
+        # A published tag is never moved, so a changed wheel set for an unchanged
+        # version has to become a new pin revision.
+        current = pinned_config()
+        if current["version"] != version:
+            revision = 1
+        elif current["sha256"] != hashes:
+            revision = current["revision"] + 1
+            print(f"  wheel set changed for {version} -> pin revision {revision}")
+        else:
+            revision = current["revision"]
 
-    tag_name = f"wheels-{version}"
+    rewrite_notebooks(version, revision, hashes)
+
+    tag_name = f"wheels-{version}-r{revision}"
     print(
         f"\nDone. Commit, then publish the immutable tag the notebooks point at:\n"
         f"  git add wheels notebooks && git commit -m 'Pin pyOpenMS {version}'\n"
@@ -208,14 +227,17 @@ def main() -> int:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("version", nargs="?",
                         help="nightly to pin, e.g. 3.6.0.dev20260903 (default: latest)")
+    parser.add_argument("--revision", type=int,
+                        help="pin revision to publish (default: 1 for a new version, "
+                             "otherwise bumped only if the wheel set changed)")
     parser.add_argument("--verify", action="store_true",
                         help="check that the pinned URLs serve the pinned bytes")
     args = parser.parse_args()
     if args.verify:
-        if args.version:
-            parser.error("--verify takes no version argument")
+        if args.version or args.revision:
+            parser.error("--verify takes no other arguments")
         return verify()
-    return update(args.version)
+    return update(args.version, args.revision)
 
 
 if __name__ == "__main__":

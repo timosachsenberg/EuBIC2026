@@ -111,6 +111,8 @@ On Linux x86_64 you can install the same wheel from this repository:
 pip install wheels/pyopenms-*-cp312-cp312-manylinux_2_34_x86_64.whl
 ```
 
+(Wheels for CPython 3.11 and 3.13 are vendored as well - swap the `cp312` tag.)
+
 #### Step 4: Start Jupyter
 
 **Option A: JupyterLab (Recommended)**
@@ -289,14 +291,22 @@ The install cell at the top of every notebook holds the whole pin:
 
 ```python
 PYOPENMS_VERSION = "3.6.0.dev20260903"
+WHEEL_PIN_REVISION = 2   # bump when the wheel set changes for an unchanged version
 WHEEL_REPO = "timosachsenberg/PyOpenMSCourse"
-WHEEL_REF = f"wheels-{PYOPENMS_VERSION}"   # git tag published with these wheels
-WHEEL_SHA256 = {"cp312": "b1d8f495...", "cp313": "5772a06e..."}
+WHEEL_REF = f"wheels-{PYOPENMS_VERSION}-r{WHEEL_PIN_REVISION}"   # git tag holding these wheels
+WHEEL_SHA256 = {"cp311": "25c9f994...", "cp312": "b1d8f495...", "cp313": "5772a06e..."}
 ```
 
-The tag name is derived from the version, so `PYOPENMS_VERSION` and `WHEEL_SHA256` are the
-only values that ever change. Wheels are built for Linux x86_64 / `manylinux_2_34`, for
-CPython 3.12 (Google Colab's current runtime) and 3.13 (in case Colab moves).
+The tag name is derived from the version and the pin revision, so the script has only these
+few values to keep in sync. Wheels are built for Linux x86_64 / `manylinux_2_34`, for
+CPython 3.11, 3.12 (Google Colab's current runtime) and 3.13, so the pin survives Colab
+moving its runtime in either direction.
+
+**Why a pin revision?** Published tags are never moved, so anything that changes the wheel
+*set* without changing the pyOpenMS version - adding a Python version, say - needs a new
+tag. That is what the revision is for; the script bumps it automatically when it notices
+the wheel set changed, and resets it to 1 for a new version. (`wheels-3.6.0.dev20260903`,
+without a revision suffix, was the first pin of that version and remains valid.)
 
 ### Re-pinning
 
@@ -318,12 +328,15 @@ it is not optional**:
 ```bash
 git add wheels notebooks && git commit -m "Pin pyOpenMS 3.6.0.dev20260903"
 git push origin main
-git tag wheels-3.6.0.dev20260903
-git push origin wheels-3.6.0.dev20260903
+git tag wheels-3.6.0.dev20260903-r2
+git push origin wheels-3.6.0.dev20260903-r2
 ```
 
-Never move or delete a published `wheels-*` tag: older notebook revisions still resolve
-against it. To change the pin, make a new one.
+The script prints the exact tag name to use. Never move or delete a published `wheels-*`
+tag: older notebook revisions still resolve against it. To change the pin, make a new one.
+
+Adding another Python version is a one-line change to `PY_TAGS` in the script followed by a
+re-pin. Each wheel is ~41 MB and stays in git history forever, so add them deliberately.
 
 ### Verifying
 
