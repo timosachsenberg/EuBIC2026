@@ -1,50 +1,46 @@
-# Vendored pyOpenMS nightly wheels
+# Pinned pyOpenMS nightly wheels
 
-This directory holds a **pinned pyOpenMS nightly build**, committed to the repository
-so that the course notebooks keep working even when the nightly build server
-<https://pypi.openms.de> is unreachable.
+The notebooks install pyOpenMS from a **pinned nightly build committed here**, not from
+`pypi.openms.de` at runtime. The wheels are fetched from an immutable git tag and their
+sha256 is checked by pip, so the course survives an outage of the nightly build server and
+every participant runs byte-identical software.
 
 | | |
 |---|---|
 | Pinned version | `3.6.0.dev20260903` |
-| Source | `https://pypi.openms.de/simple/pyopenms/` |
+| Git tag | `wheels-3.6.0.dev20260903` |
+| Upstream | `https://pypi.openms.de/simple/pyopenms/` |
 | Platform | `manylinux_2_34_x86_64` (Linux, glibc ≥ 2.34) |
-| Python | CPython 3.12 (Google Colab default) and 3.13 (spare) |
+| Python | CPython 3.12 (Google Colab's runtime) and 3.13 (spare) |
 
-Checksums of the committed files are in [`SHA256SUMS`](SHA256SUMS) and match the
-hashes published by the pypi.openms.de simple index.
+Checksums are in [`SHA256SUMS`](SHA256SUMS); they match the hashes published by the
+pypi.openms.de simple index and the `WHEEL_SHA256` values in the notebooks.
 
 ## How the notebooks use it
 
-Every notebook starts with an install cell that tries, in order:
+The install cell resolves the wheel for the running interpreter and tries, in order:
 
-1. the wheel in this directory, fetched over `raw.githubusercontent.com`
-   (pinned, works while GitHub is up),
-2. the nightly index `https://pypi.openms.de/simple/`,
-3. the stable `pyopenms` release from PyPI.
+1. `https://raw.githubusercontent.com/<repo>/wheels-<version>/wheels/<wheel>#sha256=...`
+2. the nightly index `https://pypi.openms.de/simple/`
+3. the stable `pyopenms` release from PyPI
 
-The wheel is selected from the running interpreter, e.g. Python 3.12 on Linux
-x86_64 resolves to `pyopenms-3.6.0.dev20260903-cp312-cp312-manylinux_2_34_x86_64.whl`.
-On macOS/Windows or a Python version without a vendored wheel, step 1 is skipped
-and the notebook falls back to the online sources.
+Step 1 is skipped on macOS/Windows and on any Python version without a vendored wheel; the
+`#sha256=` fragment makes pip reject the download if the bytes ever differ from the pin.
 
-Colab currently runs **Ubuntu 22.04 (glibc 2.35) with Python 3.12** on x86_64, so
-the `cp312` wheel is the one that is actually used during the course. The `cp313`
-wheel is insurance in case Colab bumps its runtime.
+## Re-pinning and verifying
 
-## Refreshing the pin
+Both are scripted - do not edit the notebooks by hand:
 
 ```bash
-# picks the latest nightly, downloads cp312 + cp313, verifies checksums,
-# and prints the notebook edit that is still needed
-./scripts/update_pyopenms_wheels.sh
+python ../scripts/update_pyopenms_wheels.py           # pin the latest nightly
+python ../scripts/update_pyopenms_wheels.py --verify  # check the published pin
 ```
 
-Then update `PYOPENMS_VERSION` in the install cell of every notebook in
-`notebooks/` and delete the superseded `.whl` files, so the repository keeps
-exactly one pinned nightly.
+The full procedure, including publishing the git tag the notebooks point at, is in
+[Updating the pinned pyOpenMS nightly](../README.md#updating-the-pinned-pyopenms-nightly).
+Never move or delete a published `wheels-*` tag.
 
-## Install manually
+## Installing manually
 
 ```bash
 pip install wheels/pyopenms-3.6.0.dev20260903-cp312-cp312-manylinux_2_34_x86_64.whl

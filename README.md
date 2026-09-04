@@ -31,10 +31,11 @@ The easiest way to run the notebooks is using Google Colab - no local installati
 **Requirements:** Only a Google account and internet connection.
 
 The install cell pulls a **pinned pyOpenMS nightly wheel that is committed to this
-repository** under [`wheels/`](wheels/), so the notebooks keep working even if the
-nightly build server `pypi.openms.de` is down. If the pinned wheel does not fit the
-runtime, the cell falls back to `pypi.openms.de` and then to the stable PyPI release.
-See [`wheels/README.md`](wheels/README.md) for the pinned version and how to refresh it.
+repository** under [`wheels/`](wheels/), fetched from an immutable git tag and verified
+by sha256, so every participant gets byte-identical software and the notebooks keep
+working even if the nightly build server `pypi.openms.de` is down. If the pinned wheel
+does not fit the runtime, the cell falls back to `pypi.openms.de` and then to the stable
+PyPI release. See [Updating the pinned pyOpenMS nightly](#updating-the-pinned-pyopenms-nightly).
 
 ---
 
@@ -256,7 +257,7 @@ PyOpenMSCourse/
 ├── data/                                 # Sample data files
 ├── wheels/                               # Pinned pyOpenMS nightly wheels (Colab fallback)
 ├── scripts/
-│   └── update_pyopenms_wheels.sh         # Refresh the pinned nightly
+│   └── update_pyopenms_wheels.py         # Re-pin / verify the pinned nightly
 ├── requirements.txt                      # Python dependencies
 ├── CLAUDE.md                            # AI assistant instructions
 └── README.md                            # This file
@@ -271,6 +272,73 @@ PyOpenMSCourse/
 | `two_ups_proteins.fasta` | 3 KB | 2 UPS1 proteins (Complement C5, EGF) | Task 1, Task 2 |
 
 **Note:** Data files are automatically downloaded when running the notebooks. No manual download required.
+
+---
+
+## Updating the pinned pyOpenMS nightly
+
+The notebooks do **not** install pyOpenMS from `pypi.openms.de` at runtime. They install a
+specific nightly wheel that lives in [`wheels/`](wheels/) and is fetched from an immutable
+git tag, with the sha256 checked by pip. That gives three things: the course survives an
+outage of the nightly server, every participant runs byte-identical software, and a
+re-pin is a reviewable diff rather than "whatever was built that morning".
+
+### How the pin is expressed
+
+The install cell at the top of every notebook holds the whole pin:
+
+```python
+PYOPENMS_VERSION = "3.6.0.dev20260903"
+WHEEL_REPO = "timosachsenberg/PyOpenMSCourse"
+WHEEL_REF = f"wheels-{PYOPENMS_VERSION}"   # git tag published with these wheels
+WHEEL_SHA256 = {"cp312": "b1d8f495...", "cp313": "5772a06e..."}
+```
+
+The tag name is derived from the version, so `PYOPENMS_VERSION` and `WHEEL_SHA256` are the
+only values that ever change. Wheels are built for Linux x86_64 / `manylinux_2_34`, for
+CPython 3.12 (Google Colab's current runtime) and 3.13 (in case Colab moves).
+
+### Re-pinning
+
+Do not edit the notebooks by hand - the script rewrites all four consistently, so they can
+never drift apart:
+
+```bash
+python scripts/update_pyopenms_wheels.py                    # pin the latest nightly
+python scripts/update_pyopenms_wheels.py 3.6.0.dev20260903  # or pin a specific one
+```
+
+It downloads the wheels, verifies them against the checksums published by the nightly
+index, deletes superseded wheels, rewrites `wheels/SHA256SUMS`, and updates
+`PYOPENMS_VERSION` and `WHEEL_SHA256` in every notebook.
+
+Then review `git diff`, and publish - **the tag is what the notebooks point at, so pushing
+it is not optional**:
+
+```bash
+git add wheels notebooks && git commit -m "Pin pyOpenMS 3.6.0.dev20260903"
+git push origin main
+git tag wheels-3.6.0.dev20260903
+git push origin wheels-3.6.0.dev20260903
+```
+
+Never move or delete a published `wheels-*` tag: older notebook revisions still resolve
+against it. To change the pin, make a new one.
+
+### Verifying
+
+```bash
+python scripts/update_pyopenms_wheels.py --verify
+```
+
+This reads the pin out of the notebooks, downloads each pinned URL and compares the served
+bytes against the pinned sha256. Run it after pushing the tag, and again shortly before a
+course - it is the one check that catches a forgotten `git push --tags`, a moved tag, or
+notebooks that disagree with each other. Finally, update the version quoted above and in
+[`wheels/README.md`](wheels/README.md).
+
+If the pinned wheel is ever unreachable the notebooks still work: they fall back to
+`pypi.openms.de` and then to the stable PyPI release, just without the version guarantee.
 
 ---
 
